@@ -1,0 +1,31 @@
+{
+  "name": "bitcoinpuzzlesolve",
+  "version": "0.0.1",
+  "description": "This is random generate bitcoind address compare with bitcoin puzzle address has balance > 0",
+  "main": "app/main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec",
+    "compile": "node script/compile.js",
+    "compile-ob": "node script/compile-obfuscation.js",
+    "start": "node app/main.js"
+  },
+  "author": "dd.tung",
+  "license": "ISC",
+  "dependencies": {
+    "bip32": "^2.0.6",
+    "bip39": "^3.0.4",
+    "bitcoinjs-lib": "^5.2.0",
+    "bytenode": "^1.3.3",
+    "chai": "^4.3.4",
+    "dotenv": "^10.0.0",
+    "fs": "0.0.1-security",
+    "lib-common-utils": "^0.0.1",
+    "mocha": "^8.4.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5",
+    "winston-log-lite": "^0.0.1"
+  }
+}

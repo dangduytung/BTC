@@ -42,11 +42,27 @@ fs.readdir('./', (err, files) => {
         }
     }
 
-    // compileFile();
+    fs.renameSync('./dist/.env_prod', './dist/.env');
+
+    /**
+     * Check param index 2 is 'obfuscation' file .js
+     */
+    let length = process.argv.length;
+    if (length > 2) {
+        let ob = process.argv[2];
+        console.log(`param index 2 : ${ob}`);
+        if (ob == 'obfuscation') {
+            // obfuscation file .js
+            compileFile();
+
+            // Create file launcher.js
+            fs.writeFileSync('./dist/launcher.js', `require('bytenode');\nrequire('./app/main.jsc');`);
+            return;
+        }
+    }
 
     // Create file launcher.js
     fs.writeFileSync('./dist/launcher.js', `require('./app/main.js');`);
-    fs.renameSync('./dist/.env_prod', './dist/.env');
 })
 
 function compileFile() {

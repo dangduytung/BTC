@@ -9,7 +9,7 @@
   "scripts": {
     "test": "mocha --reporter spec",
     "compile": "node script/compile.js",
-    "compile-ob": "node script/compile-obfuscation.js",
+    "compile-ob": "node script/compile.js obfuscation",
     "start": "node app/main.js"
   },
   "author": "dd.tung",

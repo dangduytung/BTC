@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require("path");
 
 var IGNORE_FOLDERS = ['node_modules', 'data', 'logs', 'script', 'test'];
-var IGNORE_FILES = ['README.md', 'package-lock.json'];
+var IGNORE_FILES = ['README.md', 'package-lock.json', '.gitignore', '.env'];
 
 fs.exists('./dist', exist => {
     if (exist) {
@@ -41,8 +41,6 @@ fs.readdir('./', (err, files) => {
 
         }
     }
-
-    fs.renameSync('./dist/.env_prod', './dist/.env');
 
     /**
      * Check param index 2 is 'obfuscation' file .js

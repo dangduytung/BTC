@@ -4,11 +4,10 @@ process.env.NODE_PATH = module.path;
 const log = require("winston-log-lite")(module);
 const _ = require("lib-common-utils");
 
+const Config = require("./config/Config");
 const Constants = require("./config/Constants");
 const BitcoinService = require("./services/BitcoinService");
 
-const IS_SAVE_DATA_BTC = false;
-const FILE_DATA_LIMIT = 10000;
 const FOLDER_DATA_BITCOIN = './data/bitcoin/';
 const FOLDER_DATA_DRAFT = './data/draft/';
 
@@ -16,14 +15,26 @@ var count = 0;
 var arrData = [];
 
 function initialize() {
+
+    log.info(`initialize(), NODE_PATH: ${process.env.NODE_PATH}`);
+    log.info(`initialize(), NODE_ENV: ${process.env.NODE_ENV}`);
+
+    let privateKeyMin = Constants.PRIVATE_KEY_BITS64_MIN.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
+    let privateKeyMax = Constants.PRIVATE_KEY_BITS64_MAX.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
+    log.info(`initialize(), generate random:\nFrom ${privateKeyMin}\nTo   ${privateKeyMax}`);
+
+    log.info(`initialize(), TIME_INTERVAL_GENERATE_MILISECONDS: ${Config.TIME_INTERVAL_GENERATE_MILISECONDS}(ms)`);
+    
+    log.info(`initialize(), IS_SAVE_DATA_BTC: ${Config.IS_SAVE_DATA_BTC}`);
+    if (Config.IS_SAVE_DATA_BTC) {
+        log.info(`initialize(), FILE_DATA_LIMIT: ${Config.FILE_DATA_LIMIT}`);
+        arrData = [];
+    }
+
     count = 0;
 
     _.FileUtils.validateDir(FOLDER_DATA_BITCOIN);
     _.FileUtils.validateDir(FOLDER_DATA_DRAFT);
-
-    if (IS_SAVE_DATA_BTC) {
-        arrData = [];
-    }
 }
 
 function dateToString(date) {
@@ -93,10 +104,6 @@ process.on('exit', exitHandler.bind(null,{cleanup:true}));
 process.on('SIGINT', exitHandler.bind(null, {exit:true}));
 
 async function start() {
-    log.info(`Start NODE_PATH: ${process.env.NODE_PATH}, NODE_ENV: ${process.env.NODE_ENV}`);
-    let privateKeyMin = Constants.PRIVATE_KEY_BITS64_MIN.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
-    let privateKeyMax = Constants.PRIVATE_KEY_BITS64_MAX.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
-    log.info(`Start generate random:\nFrom ${privateKeyMin}\nTo   ${privateKeyMax}\nIS_SAVE_DATA_BTC : ${IS_SAVE_DATA_BTC}`);
 
     initialize();
 
@@ -122,19 +129,19 @@ async function start() {
         }
 
         /** Write data to file */
-        if (IS_SAVE_DATA_BTC) {
+        if (Config.IS_SAVE_DATA_BTC) {
             
             arrData.push(btcData);
 
-            if (count % FILE_DATA_LIMIT == 0) {
-                log.info(`Write file ${FILE_DATA_LIMIT} objects start, count: ${count}`);
+            if (count % Config.FILE_DATA_LIMIT == 0) {
+                log.info(`start(), write file ${Config.FILE_DATA_LIMIT} objects start, count: ${count}`);
                 
-                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data-${FILE_DATA_LIMIT}-${dateToString(new Date())}.txt`, JSON.stringify(arrData));
+                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data-${Config.FILE_DATA_LIMIT}-${dateToString(new Date())}.txt`, JSON.stringify(arrData));
 
                 // Clear after save file
                 arrData = [];
 
-                log.info(`Write file ${FILE_DATA_LIMIT} objects end`);
+                log.info(`start(), write file ${Config.FILE_DATA_LIMIT} objects end`);
 
                 /** Wait some time to write log */
                 await _.TimeUtils.sleep(1000);
@@ -142,7 +149,7 @@ async function start() {
         }
 
         /** Wait some time for offload cpu */
-        await _.TimeUtils.sleep(10);
+        await _.TimeUtils.sleep(Config.TIME_INTERVAL_GENERATE_MILISECONDS);
     }
     while (true);
 }

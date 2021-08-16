@@ -19,5 +19,6 @@ node dist/launcher.js                     # Source in `dist` directory
 
 ## Run by PM2
 ```js
-pm2 start ecosystem.config.js --env=production   # Source in folder `.pm2`
+pm2 init simple                           # Generate `ecosystem.config.js` file (eg: reference in `script` folder)
+pm2 start ecosystem.config.js --env=production
 ```

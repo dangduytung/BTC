@@ -12,6 +12,7 @@ const FOLDER_DATA_BITCOIN = './data/bitcoin/';
 const FOLDER_DATA_DRAFT = './data/draft/';
 
 var count = 0;
+var surplusRandom = -1;     // Random number print log have count generate random address BTC
 var arrData = [];
 
 function initialize() {
@@ -19,22 +20,27 @@ function initialize() {
     log.info(`initialize(), NODE_PATH: ${process.env.NODE_PATH}`);
     log.info(`initialize(), NODE_ENV: ${process.env.NODE_ENV}`);
 
+    // Check folder save result data
+    _.FileUtils.validateDir(FOLDER_DATA_BITCOIN);
+
+    // Print important info
     let privateKeyMin = Constants.PRIVATE_KEY_BITS64_MIN.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
     let privateKeyMax = Constants.PRIVATE_KEY_BITS64_MAX.padStart(Constants.PRIVATE_KEY_RANGE64_HEX.length, '0');
     log.info(`initialize(), generate random:\nFrom ${privateKeyMin}\nTo   ${privateKeyMax}`);
 
+    // Time interval in do/while
     log.info(`initialize(), TIME_INTERVAL_GENERATE_MILISECONDS: ${Config.TIME_INTERVAL_GENERATE_MILISECONDS}(ms)`);
     
+    // Save generated address BTC (on DEV environment)
     log.info(`initialize(), IS_SAVE_DATA_BTC: ${Config.IS_SAVE_DATA_BTC}`);
     if (Config.IS_SAVE_DATA_BTC) {
         log.info(`initialize(), FILE_DATA_LIMIT: ${Config.FILE_DATA_LIMIT}`);
+        _.FileUtils.validateDir(FOLDER_DATA_DRAFT);
         arrData = [];
     }
 
     count = 0;
-
-    _.FileUtils.validateDir(FOLDER_DATA_BITCOIN);
-    _.FileUtils.validateDir(FOLDER_DATA_DRAFT);
+    surplusRandom = _.NumberUtils.getRndInteger(1, Config.COUNT_STEP);
 }
 
 function dateToString(date) {
@@ -101,7 +107,7 @@ process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
 process.on('exit', exitHandler.bind(null,{cleanup:true}));
 
 //catches ctrl+c event
-process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+//process.on('SIGINT', exitHandler.bind(null, {exit:true}));   //bug loop in linux
 
 async function start() {
 
@@ -146,6 +152,14 @@ async function start() {
                 /** Wait some time to write log */
                 await _.TimeUtils.sleep(1000);
             }
+        }
+
+        /** Write number current count random */
+        if (count % Config.COUNT_STEP == surplusRandom) {
+            log.info(`start(), count=${count}, surplusRandom=${surplusRandom}`);
+        }
+        if (count % Config.COUNT_STEP == 0) {
+            surplusRandom = _.NumberUtils.getRndInteger(1, Config.COUNT_STEP);
         }
 
         /** Wait some time for offload cpu */

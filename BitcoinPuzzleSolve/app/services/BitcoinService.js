@@ -1,6 +1,12 @@
 const Btc = require("bitcoinjs-lib");
 const Bip39 = require("bip39");
 const Crypto = require("crypto");
+const tinysecp = require('tiny-secp256k1');
+const { ECPairFactory } = require('ecpair');
+const log = require("winston-log-lite")(module);
+
+// https://github.com/bitcoinjs/ecpair/blob/v2.0.1/README.md
+const ECPair = ECPairFactory(tinysecp);
 
 const MAIN_NET = true;
 
@@ -14,18 +20,23 @@ const BTC_NETWORK = MAIN_NET ? Btc.networks.bitcoin : Btc.networks.testnet;
 function getBtcFromPrivateKey(privateKey) {
     let mnemonic = Bip39.entropyToMnemonic(privateKey);
     let buffer = Buffer.from(privateKey, "hex");
+    // log.debug('buffer', buffer);
+
 
     /* Compressed */
-    let keyPairC = Btc.ECPair.fromPrivateKey(buffer, {network: BTC_NETWORK});
+    let keyPairC = ECPair.fromPrivateKey(buffer, { network: BTC_NETWORK });
+    // log.debug('keyPairC', keyPairC);
+
     let wifC = keyPairC.toWIF();
     let publicKeyC = keyPairC.publicKey.toString("hex");
     let addressC = Btc.payments.p2pkh({
         pubkey: keyPairC.publicKey,
         network: BTC_NETWORK
     }).address;
+    // log.debug('addressC', addressC);
 
     /* Uncompressed */
-    let keyPairU = Btc.ECPair.fromPrivateKey(buffer, {
+    let keyPairU = ECPair.fromPrivateKey(buffer, {
         compressed: false,
         network: BTC_NETWORK,
     });
@@ -55,7 +66,7 @@ function getBtcFromPrivateKey(privateKey) {
  */
 function generateBtcRandom(compressed) {
     compressed = compressed == undefined ? true : compressed;
-    let keyPair = Btc.ECPair.makeRandom({compressed: compressed, network: BTC_NETWORK});
+    let keyPair = Btc.ECPair.makeRandom({ compressed: compressed, network: BTC_NETWORK });
     let wif = keyPair.toWIF();
     let privateKey = keyPair.privateKey.toString('hex');
     let mnemonic = Bip39.entropyToMnemonic(privateKey);

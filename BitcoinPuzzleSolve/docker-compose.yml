@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bitcoinpuzzle:
+    image: bitcoinpuzzle:${VERSION:-latest}
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./logs:/usr/src/app/logs
+      - ./data:/usr/src/app/data

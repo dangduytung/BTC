@@ -52,7 +52,7 @@ function dateToString(date) {
     let mi = String(date.getMinutes()).padStart(2, '0');
     let ss = String(date.getSeconds()).padStart(2, '0');
 
-    return yyyy + mm + dd + '_' + hh + mi + ss;
+    return yyyy + mm + dd + '-' + hh + mi + ss;
 }
 
 function genRanHexInRange(min, max, size) {
@@ -142,7 +142,7 @@ async function start() {
             if (count % Config.FILE_DATA_LIMIT == 0) {
                 log.info(`start(), write file ${Config.FILE_DATA_LIMIT} objects start, count: ${count}`);
                 
-                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data-${Config.FILE_DATA_LIMIT}-${dateToString(new Date())}.txt`, JSON.stringify(arrData));
+                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data_${Config.FILE_DATA_LIMIT}-${dateToString(new Date())}_${btcData.addressU.substring(0,10)}.txt`, JSON.stringify(arrData));
 
                 // Clear after save file
                 arrData = [];

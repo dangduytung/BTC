@@ -19,6 +19,9 @@ function initialize() {
 
     log.info(`initialize(), NODE_PATH: ${process.env.NODE_PATH}`);
     log.info(`initialize(), NODE_ENV: ${process.env.NODE_ENV}`);
+    log.info(`initialize(), PRIVATE_KEY_BITS64_MIN: ${Constants.PRIVATE_KEY_BITS64_MIN}`);
+    log.info(`initialize(), PRIVATE_KEY_BITS64_MAX: ${Constants.PRIVATE_KEY_BITS64_MAX}`);
+    log.info(`initialize(), TARGET_ADDRESS_COMPRESSED_BITS64: ${Constants.TARGET_ADDRESS_COMPRESSED_BITS64}`);
 
     // Check folder save result data
     _.FileUtils.validateDir(FOLDER_DATA_BITCOIN);
@@ -30,7 +33,7 @@ function initialize() {
 
     // Time interval in do/while
     log.info(`initialize(), TIME_INTERVAL_GENERATE_MILISECONDS: ${Config.TIME_INTERVAL_GENERATE_MILISECONDS}(ms)`);
-    
+
     // Save generated address BTC (on DEV environment)
     log.info(`initialize(), IS_SAVE_DATA_BTC: ${Config.IS_SAVE_DATA_BTC}`);
     if (Config.IS_SAVE_DATA_BTC) {
@@ -77,7 +80,7 @@ function genRanHexInRange(min, max, size) {
 
 async function exitHandler(options, exitCode) {
     log.info(`exitHandler count: ${count}, options: ${JSON.stringify(options)}, exitCode: ${exitCode}`);
-    
+
     if (options.cleanup) {
         log.info(`exitHandler cleanup`);
         console.log(`exitHandler cleanup`);
@@ -90,21 +93,21 @@ async function exitHandler(options, exitCode) {
     if (options.exit) {
         log.info(`exitHandler exit`);
         console.log(`exitHandler exit`);
-        process.exit();   
+        process.exit();
     }
 }
 
 process.stdin.resume();//so the program will not close instantly
 
 //catches uncaught exceptions
-process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 // catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
-process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+process.on('SIGUSR1', exitHandler.bind(null, { exit: true }));
+process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
 
 //do something when app is closing
-process.on('exit', exitHandler.bind(null,{cleanup:true}));
+process.on('exit', exitHandler.bind(null, { cleanup: true }));
 
 //catches ctrl+c event
 //process.on('SIGINT', exitHandler.bind(null, {exit:true}));   //bug loop in linux
@@ -119,7 +122,7 @@ async function start() {
     /** Loop generate random BTC */
     do {
         count++;
-        let privateKey = genRanHexInRange(Constants.PRIVATE_KEY_BITS64_MIN, Constants.PRIVATE_KEY_BITS64_MAX,Constants.PRIVATE_KEY_RANGE64_HEX.length);
+        let privateKey = genRanHexInRange(Constants.PRIVATE_KEY_BITS64_MIN, Constants.PRIVATE_KEY_BITS64_MAX, Constants.PRIVATE_KEY_RANGE64_HEX.length);
         let btcData = BitcoinService.getBtcFromPrivateKey(privateKey);
 
         /** log.info(`Completed at ${count} ${btcData.privateKey}, ${btcData.addressC}`); */
@@ -136,13 +139,13 @@ async function start() {
 
         /** Write data to file */
         if (Config.IS_SAVE_DATA_BTC) {
-            
+
             arrData.push(btcData);
 
             if (count % Config.FILE_DATA_LIMIT == 0) {
                 log.info(`start(), write file ${Config.FILE_DATA_LIMIT} objects start, count: ${count}`);
-                
-                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data_${Config.FILE_DATA_LIMIT}-${dateToString(new Date())}_${btcData.addressU.substring(0,10)}.txt`, JSON.stringify(arrData));
+
+                _.FileUtils.writeFileSync(`${FOLDER_DATA_DRAFT}btc-data_${Config.FILE_DATA_LIMIT}-${dateToString(new Date())}_${btcData.addressU.substring(0, 10)}.txt`, JSON.stringify(arrData));
 
                 // Clear after save file
                 arrData = [];

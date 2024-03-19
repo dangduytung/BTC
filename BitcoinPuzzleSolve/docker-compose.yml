@@ -4,8 +4,13 @@ services:
   bitcoinpuzzle:
     image: bitcoinpuzzle:${VERSION:-latest}
     build: .
-    ports:
-      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PRIVATE_KEY_RANGE_MIN: privatekeys.pw_bitcoin_puzzle_private_key_min
+      PRIVATE_KEY_RANGE_MAX: privatekeys.pw_bitcoin_puzzle_private_key_max
+      BITCOIN_ADDRESS_COMPRESSED: privatekeys.pw_bitcoin_puzzle_public_address_compressed
+    # ports:
+    #   - "3000:3000"
     volumes:
       - ./logs:/usr/src/app/logs
       - ./data:/usr/src/app/data
